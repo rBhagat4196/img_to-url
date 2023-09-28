@@ -1,0 +1,84 @@
+'use client';
+import { useState } from 'react';
+import { storage } from '../firebase/firebase';
+import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
+import {v4 as uuid} from "uuid"
+import { useNavigation } from '../context/navigationContext';
+import Loader from './Loader';
+// import { URL } from 'next/dist/compiled/@edge-runtime/primitives/url';
+const ImageUploader = () => {
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imageurl ,setimageurl] = useState(null);
+  const [isLoading,setIsLoading] = useState(false);
+  const {setCopiedText} = useNavigation();
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    setSelectedImage(file);
+    // console.log(URL.createObjectURL(file));
+  };
+
+  const handleUpload = async() => {
+    try {
+        if (selectedImage) {
+            const storageRef = ref(storage, uuid());
+           
+            const uploadTask = uploadBytesResumable(storageRef,selectedImage);
+            
+            uploadTask.on(
+                "state_changed",
+                (snapshot) => {},
+                (error) => {
+                    console.error(error);
+                },
+                () => {
+                    getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+                           setimageurl(downloadURL);
+                           setCopiedText(downloadURL);
+                           setIsLoading(false);
+                           console.log(isLoading)
+                        }
+                    );
+                }
+            );
+          setIsLoading(true);
+          console.log(isLoading);
+        }
+    } catch (error) {
+        console.error(error);
+    }
+  };
+
+  return <>
+     {isLoading ? <Loader/> : (
+      <div className=" flex flex-col  ">
+
+        <div className="flex justify-center item-center relative">
+          <div className=''>
+            {(selectedImage) ? (
+                <img src={URL.createObjectURL(selectedImage)} alt='thumbnail' height={400} width={400}/>
+                ):(
+                <img src="emptyImage.png" alt='thumbnail'  height={400} width={400}/>
+            )}
+          </div>
+            <input type="file" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer h-4/5 w-4/5"/>
+        </div>
+
+        <div className="flex justify-center items-center mt-5">
+            <button onClick={handleUpload}>Upload Image</button>
+        </div>
+
+
+      <div className="mt-5">
+        <p className=''>
+          {imageurl}
+        </p>
+      </div>
+
+
+    </div>
+     )}
+  </>
+    
+};
+
+export default ImageUploader;
