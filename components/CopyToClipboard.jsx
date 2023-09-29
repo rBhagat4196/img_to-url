@@ -5,17 +5,20 @@ const CopyToClipboardButton = ({ textToCopy }) => {
   const {isEmpty , setIsEmpty,copiedText} = useNavigation();
 
   const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(copiedText);
-      setIsEmpty(false);
-    } catch (err) {
-      console.error('Failed to copy to clipboard:', err);
+    if(copiedText.length < 10 ) alert("Nothing To Copy");
+    if(copiedText.length > 10){
+      try {
+        await navigator.clipboard.writeText(copiedText);
+        setIsEmpty(false);
+      } catch (err) {
+        console.error('Failed to copy to clipboard:', err);
+      }
+  
+      // Reset the "Copied" status after a few seconds
+      setTimeout(() => {
+        setIsEmpty(false);
+      }, 2000);
     }
-
-    // Reset the "Copied" status after a few seconds
-    setTimeout(() => {
-      setIsEmpty(false);
-    }, 2000);
   };
 
   return (

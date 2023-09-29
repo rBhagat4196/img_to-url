@@ -2,8 +2,8 @@ import React from 'react'
 
 const Loader = () => {
   return (
-    <div>
-      Loading..
+    <div className='flex justify-center items-center'>
+      <img src="loader.svg" className=''/>
     </div>
   )
 }
